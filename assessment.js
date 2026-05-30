@@ -606,9 +606,12 @@ function goNext() {
   if (selectedVal === null) return;
   const { section, data } = QUEUE[currentIdx];
 
+  // Build impact BEFORE storing (so running raw reflects state after this answer)
+  const impact = buildImpact(section, data, selectedVal);
+
   // Store answer
   if (section === "CTX") {
-    const val = section === "CTX" && data.type === "text"
+    const val = data.type === "text"
       ? (document.querySelector("#options-container input") || {}).value || selectedVal
       : selectedVal;
     ctxAnswers[data.id] = data.type === "text" ? val : data.options[val];
@@ -616,6 +619,9 @@ function goNext() {
   } else {
     answers[data.id] = selectedVal;
   }
+
+  // Refresh scoring panel with this answer's impact
+  refreshScoringPanel(impact);
 
   currentIdx++;
   if (currentIdx >= TOTAL_Q) {
@@ -737,6 +743,198 @@ function showResults() {
 }
 
 /* ----------------------------------------------------------
-   15. INIT
+   15. LIVE SCORING PANEL
+---------------------------------------------------------- */
+let scoringPanelOpen = false;
+
+function toggleScoringPanel() {
+  scoringPanelOpen = !scoringPanelOpen;
+  const body   = document.getElementById("scoring-body");
+  const toggle = document.getElementById("scoring-toggle");
+  body.style.display   = scoringPanelOpen ? "block" : "none";
+  toggle.textContent   = scoringPanelOpen ? "🔢 Hide Live Scoring" : "🔢 Show Live Scoring";
+  // Round corners of toggle when open
+  toggle.style.borderRadius = scoringPanelOpen ? "var(--radius) var(--radius) 0 0" : "var(--radius)";
+  if (scoringPanelOpen) refreshScoringPanel(null);
+}
+
+// Call this after every answer is stored
+function refreshScoringPanel(lastImpact) {
+  if (!scoringPanelOpen) return;
+
+  const rawScores = calcRunningRaw(answers);
+  const maxPossible = calcMaxPossible();
+
+  // ── Last Impact ──
+  const impactEl = document.getElementById("last-impact");
+  if (!lastImpact) {
+    impactEl.innerHTML = `<span class="scoring-empty">Answer a question to see scoring.</span>`;
+  } else {
+    let noteHtml = `<div class="impact-note">${lastImpact.explanation}</div>`;
+    let rowsHtml = lastImpact.affected
+      .sort((a, b) => b.pts - a.pts)
+      .map(r => `
+        <div class="impact-row">
+          <span class="impact-pts pts-${r.pts}">+${r.pts}</span>
+          <span class="impact-role">${ROLES[r.id].name}</span>
+          <span class="impact-cluster">${ROLES[r.id].cluster}</span>
+          <span class="impact-total">Total: ${rawScores[r.id]}</span>
+        </div>
+      `).join("");
+    impactEl.innerHTML = noteHtml + rowsHtml;
+  }
+
+  // ── Top 10 Standings ──
+  const ranked = Object.entries(rawScores)
+    .map(([id, raw]) => ({ id: Number(id), raw }))
+    .sort((a, b) => b.raw - a.raw);
+
+  const topRaw = ranked[0]?.raw || 1;
+  const standingsEl = document.getElementById("live-standings");
+  standingsEl.innerHTML = ranked.slice(0, 10).map((item, i) => {
+    const barPct = Math.round((item.raw / Math.max(topRaw, 1)) * 100);
+    const maxPoss = maxPossible[item.id];
+    return `
+      <div class="standing-row">
+        <span class="standing-rank">${i + 1}</span>
+        <span class="standing-name">${ROLES[item.id].name}</span>
+        <div class="standing-bar-wrap">
+          <div class="standing-bar" style="width:${barPct}%"></div>
+        </div>
+        <span class="standing-raw">${item.raw}/${maxPoss}</span>
+      </div>
+    `;
+  }).join("");
+
+  // ── All 36 Scores ──
+  const allEl = document.getElementById("all-scores");
+  allEl.innerHTML = `<div class="all-scores-grid">` +
+    ranked.map(item => `
+      <div class="score-row">
+        <span class="score-id">${item.id}</span>
+        <span class="score-name" title="${ROLES[item.id].name}">${ROLES[item.id].name}</span>
+        <span class="score-val${item.raw === 0 ? " zero" : ""}">${item.raw}</span>
+      </div>
+    `).join("") +
+  `</div>`;
+}
+
+// Compute raw scores from current answers (D1–D4 only, no normalisation, no D5)
+function calcRunningRaw(answers) {
+  const raw = {};
+  for (let id = 1; id <= 36; id++) raw[id] = 0;
+
+  D1.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    let pts = 0;
+    if (!q.neg) pts = ans === "likely" ? 2 : ans === "neutral" ? 1 : 0;
+    else        pts = ans === "notlikely" ? 2 : ans === "neutral" ? 1 : 0;
+    q.roles.forEach(r => { raw[r] += pts; });
+  });
+
+  D2.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    if (ans === "A") q.rolesA.forEach(r => { raw[r] += 2; });
+    else             q.rolesB.forEach(r => { raw[r] += 2; });
+  });
+
+  D3_SCALE.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const pts = ans === "high" ? 2 : ans === "mid" ? 1 : 0;
+    q.rolesHigh.forEach(r => { raw[r] += pts; });
+  });
+
+  D3_TRADEOFF.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    if (ans === "A") q.rolesA.forEach(r => { raw[r] += 2; });
+    else             q.rolesB.forEach(r => { raw[r] += 2; });
+  });
+
+  D4.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const pts = ans === "agree" ? 2 : ans === "somewhat" ? 1 : 0;
+    q.roles.forEach(r => { raw[r] += pts; });
+  });
+
+  return raw;
+}
+
+// Build the impact object describing what the last answer did
+function buildImpact(section, data, answerVal) {
+  let affected = [];
+  let explanation = "";
+
+  if (section === "CTX") {
+    return null; // unscored
+  }
+
+  if (section === "D1") {
+    const q = data;
+    let pts;
+    if (!q.neg) {
+      pts = answerVal === "likely" ? 2 : answerVal === "neutral" ? 1 : 0;
+      const ansLabel = answerVal === "likely" ? "Likely" : answerVal === "neutral" ? "Neutral" : "Not Likely";
+      explanation = `D1 Interest (${q.neg ? "NEG" : "POS"}): You answered <strong>${ansLabel}</strong> → <strong>${pts} point${pts !== 1 ? "s" : ""}</strong> added to each of the ${q.roles.length} linked roles.`;
+    } else {
+      pts = answerVal === "notlikely" ? 2 : answerVal === "neutral" ? 1 : 0;
+      const ansLabel = answerVal === "notlikely" ? "Not Likely" : answerVal === "neutral" ? "Neutral" : "Likely";
+      explanation = `D1 Interest (NEG — inverted scoring): You answered <strong>${ansLabel}</strong> → <strong>${pts} point${pts !== 1 ? "s" : ""}</strong> added to each of the ${q.roles.length} linked roles. (NEG questions reward "Not Likely" with 2pts to catch response bias.)`;
+    }
+    affected = q.roles.map(id => ({ id, pts }));
+  }
+
+  else if (section === "D2") {
+    const chosen = answerVal === "A" ? data.rolesA : data.rolesB;
+    const other  = answerVal === "A" ? data.rolesB : data.rolesA;
+    explanation = `D2 Work Style (forced choice): You chose <strong>Option ${answerVal}</strong> → <strong>+2 pts</strong> to ${chosen.length} roles on that side. The other ${other.length} roles get 0.`;
+    affected = [
+      ...chosen.map(id => ({ id, pts: 2 })),
+      ...other.map(id => ({ id, pts: 0 })),
+    ];
+  }
+
+  else if (section === "D3_SCALE") {
+    const pts = answerVal === "high" ? 2 : answerVal === "mid" ? 1 : 0;
+    const label = answerVal === "high" ? "High" : answerVal === "mid" ? "Medium" : "Low";
+    explanation = `D3 Values (scale): You answered <strong>${label}</strong> → <strong>${pts} pt${pts !== 1 ? "s" : ""}</strong> to ${data.rolesHigh.length} High-linked roles. Low-linked roles always receive 0.`;
+    affected = [
+      ...data.rolesHigh.map(id => ({ id, pts })),
+      ...data.rolesLow.map(id => ({ id, pts: 0 })),
+    ];
+  }
+
+  else if (section === "D3_TRADEOFF") {
+    const chosen = answerVal === "A" ? data.rolesA : data.rolesB;
+    const other  = answerVal === "A" ? data.rolesB : data.rolesA;
+    explanation = `D3 Values (trade-off): You chose <strong>Option ${answerVal}</strong> → <strong>+2 pts</strong> to ${chosen.length} roles. The other ${other.length} roles get 0.`;
+    affected = [
+      ...chosen.map(id => ({ id, pts: 2 })),
+      ...other.map(id => ({ id, pts: 0 })),
+    ];
+  }
+
+  else if (section === "D4") {
+    const pts = answerVal === "agree" ? 2 : answerVal === "somewhat" ? 1 : 0;
+    const label = answerVal === "agree" ? "Agree" : answerVal === "somewhat" ? "Somewhat Agree" : "Disagree";
+    explanation = `D4 Strengths: You answered <strong>${label}</strong> → <strong>${pts} pt${pts !== 1 ? "s" : ""}</strong> added to each of the ${data.roles.length} linked roles.`;
+    affected = data.roles.map(id => ({ id, pts }));
+  }
+
+  else if (section === "D5") {
+    const picked = data.options[answerVal];
+    explanation = `D5 Bonus (tiebreaker — applied after normalisation): You selected <strong>Option ${picked.label}</strong> → <strong>+2 pts</strong> to <strong>${ROLES[picked.role].name}</strong> only. Other options get 0.`;
+    affected = data.options.map((opt, i) => ({ id: opt.role, pts: i === answerVal ? 2 : 0 }));
+  }
+
+  return { explanation, affected };
+}
+
+/* ----------------------------------------------------------
+   16. INIT
 ---------------------------------------------------------- */
 // Nothing to auto-init — user clicks "Begin Assessment" to start.
