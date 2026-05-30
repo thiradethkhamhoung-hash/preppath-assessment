@@ -58,6 +58,34 @@
           <button class="btn-primary" id="btn-next" onclick="goNext()" disabled>Next →</button>
         </div>
       </div>
+
+      <!-- LIVE SCORING PANEL -->
+      <div class="scoring-panel" id="scoring-panel">
+        <button class="scoring-toggle" id="scoring-toggle" onclick="toggleScoringPanel()">
+          🔢 Show Live Scoring
+        </button>
+        <div class="scoring-body" id="scoring-body" style="display:none">
+
+          <div class="scoring-section">
+            <div class="scoring-section-title">⚡ Last Answer Impact</div>
+            <div id="last-impact">
+              <span class="scoring-empty">Answer a question to see scoring.</span>
+            </div>
+          </div>
+
+          <div class="scoring-section">
+            <div class="scoring-section-title">📊 Current Standings — Top 10</div>
+            <div id="live-standings"></div>
+          </div>
+
+          <div class="scoring-section">
+            <div class="scoring-section-title">📋 All 36 Roles (Raw Scores)</div>
+            <div id="all-scores"></div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
     <!-- RESULTS SCREEN -->
