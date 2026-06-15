@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PrepPath — Career Assessment (Simplified Wording)</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f5f5f3;
+  --surface:   #ffffff;
+  --border:    #e0e0dc;
+  --text:      #1a1a1a;
+  --text-muted:#6b6b6b;
+  --accent:    #2563eb;
+  --accent-light: #eff4ff;
+  --accent-hover: #1d4ed8;
+  --success:   #16a34a;
+  --gold:      #d97706;
+  --silver:    #6b7280;
+  --bronze:    #92400e;
+  --radius:    10px;
+  --shadow:    0 2px 12px rgba(0,0,0,0.08);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+#app { max-width: 680px; margin: 0 auto; padding: 24px 16px 48px; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  box-shadow: var(--shadow);
+}
+.card.center { text-align: center; }
+
+.banner {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+
+.logo {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+}
+
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+
+.subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 28px; }
+
+.info-blocks {
+  display: flex; justify-content: center; gap: 24px; margin-bottom: 28px;
+  padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.info-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.info-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+.info-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.section-preview { text-align: left; background: var(--bg); border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; }
+.preview-item { font-size: 13px; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid var(--border); }
+.preview-item:last-child { border-bottom: none; }
+.preview-item strong { color: var(--text); }
+
+.progress-bar-wrap { background: var(--border); border-radius: 99px; height: 6px; margin-bottom: 8px; overflow: hidden; }
+.progress-bar-inner { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; }
+.progress-label { font-size: 12px; color: var(--text-muted); text-align: right; margin-bottom: 16px; }
+
+.dim-badge {
+  display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; background: var(--accent-light); color: var(--accent);
+  border-radius: 4px; padding: 3px 8px; margin-bottom: 12px;
+}
+.q-number { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.q-text { font-size: 18px; font-weight: 600; line-height: 1.5; margin-bottom: 28px; color: var(--text); }
+
+.options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.option-btn {
+  display: block; width: 100%; text-align: left; padding: 14px 18px;
+  background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 15px; color: var(--text); cursor: pointer;
+  transition: border-color 0.15s, background 0.15s; font-family: inherit; line-height: 1.4;
+}
+.option-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+.option-btn.selected { border-color: var(--accent); background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.option-label { font-weight: 700; margin-right: 8px; color: var(--accent); }
+.option-btn.selected .option-label { color: var(--accent); }
+
+.options.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.options.two-col .option-btn { height: 100%; }
+.options.four-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.options.scale-row { flex-direction: row; gap: 10px; }
+.options.scale-row .option-btn { flex: 1; text-align: center; padding: 14px 8px; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 20px; }
+
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+.btn-secondary {
+  background: transparent; color: var(--text-muted); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer;
+  font-family: inherit; transition: border-color 0.15s, color 0.15s;
+}
+.btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+.results-header { text-align: center; padding: 32px 0 24px; }
+.top3 { display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
+
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow); }
+.result-card.rank-1 { border-left: 4px solid var(--gold); }
+.result-card.rank-2 { border-left: 4px solid var(--silver); }
+.result-card.rank-3 { border-left: 4px solid var(--bronze); }
+
+.result-rank-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.medal { font-size: 22px; }
+.result-rank-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.result-match { margin-left: auto; font-size: 22px; font-weight: 700; color: var(--accent); }
+.result-role { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.result-cluster { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 10px; }
+.result-titles { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+.result-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+.full-breakdown-wrap { margin-bottom: 32px; }
+.full-breakdown-wrap h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.breakdown-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.breakdown-rank { width: 24px; text-align: right; color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+.breakdown-name { flex: 1; font-weight: 500; }
+.breakdown-bar-wrap { width: 120px; background: var(--bg); border-radius: 99px; height: 6px; flex-shrink: 0; }
+.breakdown-bar { height: 100%; background: var(--accent); border-radius: 99px; }
+.breakdown-pct { width: 42px; text-align: right; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+
+.context-reflection { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 32px; font-size: 14px; }
+.context-reflection h3 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 14px; }
+.context-reflection p { margin-bottom: 8px; color: var(--text); line-height: 1.6; }
+.context-reflection strong { color: var(--text); }
+
+.results-footer { text-align: center; padding-bottom: 32px; }
+
+/* ── Live Scoring Panel ── */
+.scoring-panel { margin-top: 12px; }
+.scoring-toggle {
+  width: 100%; background: var(--surface); border: 1.5px dashed var(--border);
+  border-radius: var(--radius); padding: 10px 16px; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; font-family: inherit; text-align: left;
+  transition: border-color 0.15s, color 0.15s;
+}
+.scoring-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.scoring-body {
+  background: var(--surface); border: 1.5px dashed var(--border); border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius); padding: 20px;
+}
+.scoring-section { margin-bottom: 20px; }
+.scoring-section:last-child { margin-bottom: 0; }
+.scoring-section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-muted); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+.scoring-empty { font-size: 13px; color: var(--text-muted); font-style: italic; }
+.impact-note { font-size: 12px; color: var(--text-muted); background: var(--bg); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.5; }
+.impact-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--bg); }
+.impact-pts { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 4px; min-width: 32px; text-align: center; flex-shrink: 0; }
+.impact-pts.pts-2 { background: #dcfce7; color: #16a34a; }
+.impact-pts.pts-1 { background: #fef9c3; color: #a16207; }
+.impact-pts.pts-0 { background: #f3f4f6; color: #9ca3af; }
+.impact-role { flex: 1; }
+.impact-cluster { font-size: 11px; color: var(--text-muted); }
+.impact-total { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+.standing-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--bg); }
+.standing-rank { width: 20px; font-size: 11px; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+.standing-name { flex: 1; font-weight: 500; }
+.standing-bar-wrap { width: 80px; background: var(--bg); border-radius: 99px; height: 5px; flex-shrink: 0; }
+.standing-bar { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; }
+.standing-raw { width: 28px; text-align: right; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+
+.all-scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.score-row { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 3px 0; border-bottom: 1px solid var(--bg); }
+.score-id { width: 18px; color: var(--text-muted); flex-shrink: 0; font-size: 10px; }
+.score-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-val { font-weight: 700; font-size: 12px; color: var(--accent); flex-shrink: 0; }
+.score-val.zero { color: var(--border); }
+
+@media (max-width: 480px) {
+  .card { padding: 24px 20px; }
+  h1 { font-size: 22px; }
+  .q-text { font-size: 16px; }
+  .options.two-col { grid-template-columns: 1fr; }
+  .options.four-col { grid-template-columns: 1fr; }
+  .options.scale-row { flex-direction: column; }
+  .info-blocks { gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- WELCOME SCREEN -->
+  <div id="screen-welcome" class="screen active">
+    <div class="card center">
+      <div class="banner">SIMPLIFIED WORDING — B1–B2 TEST VERSION</div>
+      <div class="logo">PrepPath</div>
+      <h1>Career Assessment</h1>
+      <p class="subtitle">Discover your top career matches from 36 roles across 11 fields.</p>
+      <div class="info-blocks">
+        <div class="info-block"><span class="info-num">45</span><span class="info-label">Questions</span></div>
+        <div class="info-block"><span class="info-num">5</span><span class="info-label">Dimensions</span></div>
+        <div class="info-block"><span class="info-num">36</span><span class="info-label">Career Roles</span></div>
+      </div>
+      <div class="section-preview">
+        <div class="preview-item"><strong>Part 1:</strong> 3 context questions (unscored)</div>
+        <div class="preview-item"><strong>D1 — Interests:</strong> 17 questions</div>
+        <div class="preview-item"><strong>D2 — Work Style:</strong> 8 questions</div>
+        <div class="preview-item"><strong>D3 — Values:</strong> 7 questions</div>
+        <div class="preview-item"><strong>D4 — Strengths:</strong> 5 statements</div>
+        <div class="preview-item"><strong>D5 — Bonus:</strong> 5 role-sorting questions</div>
+      </div>
+      <button class="btn-primary" onclick="startAssessment()">Begin Assessment</button>
+    </div>
+  </div>
+
+  <!-- QUESTION SCREEN -->
+  <div id="screen-question" class="screen">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="progress-bar"></div></div>
+    <div class="progress-label" id="progress-label"></div>
+    <div class="card" id="question-card">
+      <div class="dim-badge" id="dim-badge"></div>
+      <div class="q-number" id="q-number"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options-container"></div>
+      <div class="nav-row">
+        <button class="btn-secondary" id="btn-back" onclick="goBack()">← Back</button>
+        <button class="btn-primary" id="btn-next" onclick="goNext()" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- LIVE SCORING PANEL -->
+    <div class="scoring-panel" id="scoring-panel">
+      <button class="scoring-toggle" id="scoring-toggle" onclick="toggleScoringPanel()">🔢 Show Live Scoring</button>
+      <div class="scoring-body" id="scoring-body" style="display:none">
+        <div class="scoring-section">
+          <div class="scoring-section-title">⚡ Last Answer Impact</div>
+          <div id="last-impact"><span class="scoring-empty">Answer a question to see scoring.</span></div>
+        </div>
+        <div class="scoring-section">
+          <div class="scoring-section-title">📊 Current Standings — Top 10</div>
+          <div id="live-standings"></div>
+        </div>
+        <div class="scoring-section">
+          <div class="scoring-section-title">📋 All 36 Roles (Raw Scores)</div>
+          <div id="all-scores"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="results-header">
+      <div class="logo">PrepPath</div>
+      <h1>Your Career Matches</h1>
+      <p class="subtitle" id="results-subtitle"></p>
+    </div>
+    <div class="top3" id="top3-container"></div>
+    <div class="full-breakdown-wrap">
+      <h2>Full Ranking</h2>
+      <div class="full-breakdown" id="full-breakdown"></div>
+    </div>
+    <div class="context-reflection" id="context-reflection"></div>
+    <div class="results-footer">
+      <button class="btn-secondary" onclick="restartAssessment()">Retake Assessment</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ==========================================================
+   PrepPath Phase 2 — Career Assessment (Simplified Wording B1-B2)
+========================================================== */
+
+/* ── 1. ROLES ── */
+const ROLES = {
+  1:  { name: "Medical Doctor / Nurse / GP",            cluster: "Health & Wellbeing",             titles: "General Practitioner, Nurse, Midwife, Physician Assistant",                       desc: "Provides medical care through diagnosis, treatment, and monitoring of patients." },
+  2:  { name: "Mental Health Specialist",               cluster: "Health & Wellbeing",             titles: "Psychologist, Therapist, Counselor, Psychiatrist",                                 desc: "Supports emotional and psychological wellbeing through therapy and mental health treatment." },
+  3:  { name: "Pharmaceutical & Lab Scientist",         cluster: "Health & Wellbeing",             titles: "Pharmacist, Biomedical Scientist, Lab Technician, Clinical Researcher",             desc: "Conducts testing, research, and medication development in lab or pharmacy settings." },
+  4:  { name: "Social Worker / Community Support",      cluster: "Health & Wellbeing",             titles: "Social Worker, Welfare Advisor, Community Officer, Case Manager",                   desc: "Supports vulnerable individuals and communities through advocacy and welfare services." },
+  5:  { name: "Software & App Developer",               cluster: "Technology & Digital",           titles: "Frontend Developer, Backend Developer, Full Stack, Mobile App Developer",           desc: "Designs, develops, and maintains software or mobile applications." },
+  6:  { name: "Data & AI Specialist",                   cluster: "Technology & Digital",           titles: "Data Analyst, Data Scientist, ML Engineer, Data Engineer",                         desc: "Uses data to generate insights or build intelligent systems for decision-making." },
+  7:  { name: "Cybersecurity Specialist",               cluster: "Technology & Digital",           titles: "Cybersecurity Analyst, Cloud Engineer, Network Admin, DevOps",                     desc: "Protects digital systems and networks from cyber threats." },
+  8:  { name: "Product Manager / Tech Strategy",        cluster: "Technology & Digital",           titles: "Product Manager, Growth Manager, Technical Program Manager",                       desc: "Bridges business and technology to define, build, and grow digital products." },
+  9:  { name: "General Manager / Executive",            cluster: "Business & Strategy",            titles: "Operations Manager, Director, Executive Officer, Business Unit Head",               desc: "Oversees departments or businesses, managing operations, strategy, and decision-making." },
+  10: { name: "Business Analyst / Consultant",          cluster: "Business & Strategy",            titles: "Business Analyst, Management Consultant, Strategy Analyst",                        desc: "Improves business performance through data-driven analysis and strategic planning." },
+  11: { name: "Human Resources / People Ops",           cluster: "Business & Strategy",            titles: "HR Manager, Talent Partner, L&D Specialist, Recruiter",                             desc: "Manages recruitment, employee development, and organisational culture." },
+  12: { name: "Supply Chain & Logistics Manager",       cluster: "Business & Strategy",            titles: "Procurement Manager, Logistics Coordinator, Inventory Manager",                   desc: "Oversees the flow of goods, inventory, sourcing, and transportation." },
+  13: { name: "Entrepreneur / Startup Founder",         cluster: "Business & Strategy",            titles: "Startup Founder, Business Owner, Social Entrepreneur",                            desc: "Builds and grows a new business or venture across multiple functions." },
+  14: { name: "Accountant / Auditor",                   cluster: "Finance, Legal & Policy",        titles: "Certified Accountant, Auditor, Financial Controller, Bookkeeper",                 desc: "Manages financial records, audits, and reporting for accuracy and compliance." },
+  15: { name: "Finance Analyst / Banking Professional", cluster: "Finance, Legal & Policy",        titles: "Investment Analyst, Commercial Banker, Financial Advisor, Credit Analyst",         desc: "Provides financial analysis, forecasting, or investment services." },
+  16: { name: "Lawyer / Legal Professional",            cluster: "Finance, Legal & Policy",        titles: "Corporate Lawyer, Legal Advisor, Paralegal, Legal Counsel",                       desc: "Advises on legal matters, represents clients, or supports compliance." },
+  17: { name: "Policy & Government Officer",            cluster: "Finance, Legal & Policy",        titles: "Policy Analyst, Regulatory Officer, Government Affairs Specialist",               desc: "Develops and enforces policies and regulations for public or private institutions." },
+  18: { name: "Teacher / Educator / Academic",          cluster: "Education & Knowledge",          titles: "School Teacher, University Lecturer, Academic Researcher, Tutor",                 desc: "Educates learners of all ages or conducts research in academic settings." },
+  19: { name: "Interpreter / Multilingual Specialist",  cluster: "Education & Knowledge",          titles: "Interpreter, Translator, Localisation Specialist",                                desc: "Facilitates communication across languages in spoken or written form." },
+  20: { name: "Architect / Urban Designer",             cluster: "Design & Built Environment",     titles: "Architect, Urban Planner, Interior Designer, Landscape Architect",                 desc: "Designs and plans buildings, urban spaces, and environments." },
+  21: { name: "Visual & UX/UI Designer",                cluster: "Design & Built Environment",     titles: "Graphic Designer, UX Designer, UI Designer, Art Director",                        desc: "Creates visual experiences for branding, digital products, or media." },
+  22: { name: "Creative Media & Content Professional",  cluster: "Creative & Communication",       titles: "Content Creator, Copywriter, Video Producer, Podcast Host",                       desc: "Produces written, video, or multimedia content for digital platforms." },
+  23: { name: "Marketing & Communications Manager",     cluster: "Creative & Communication",       titles: "Digital Marketer, Brand Manager, PR Coordinator, Comms Director",                 desc: "Promotes products or organisations through campaigns, branding, and strategy." },
+  24: { name: "Writer / Editor / Journalist",           cluster: "Creative & Communication",       titles: "Journalist, Editor, Author, Content Strategist",                                  desc: "Researches and writes compelling stories, articles, or content for audiences." },
+  25: { name: "Fashion & Textile Designer",             cluster: "Creative & Communication",       titles: "Fashion Designer, Textile Designer, Costume Designer, Stylist",                   desc: "Creates clothing, accessories, and textile products blending artistry with function." },
+  26: { name: "Chef / Culinary Professional",           cluster: "Hospitality & Services",         titles: "Chef, Pastry Chef, Sous Chef, Kitchen Manager",                                   desc: "Prepares meals and manages kitchen operations in professional settings." },
+  27: { name: "Hospitality & Events Manager",           cluster: "Hospitality & Services",         titles: "Hotel Manager, Event Planner, Venue Coordinator",                                 desc: "Manages guest experiences and coordinates events or hospitality services." },
+  28: { name: "Hair, Beauty & Wellness Professional",   cluster: "Hospitality & Services",         titles: "Hairstylist, Aesthetician, Nail Technician, Spa Therapist",                       desc: "Delivers grooming, skincare, and wellness services to clients." },
+  29: { name: "Civil / Infrastructure Engineer",        cluster: "Engineering & Physical Systems", titles: "Civil Engineer, Structural Engineer, Transportation Engineer",                     desc: "Plans and oversees construction of public infrastructure and transport systems." },
+  30: { name: "Mechanical / Electrical Engineer",       cluster: "Engineering & Physical Systems", titles: "Mechanical Engineer, Electrical Engineer, Production Engineer",                   desc: "Designs and maintains mechanical or electrical systems in industrial settings." },
+  31: { name: "Environmental & Energy Engineer",        cluster: "Engineering & Physical Systems", titles: "Renewable Energy Engineer, Environmental Engineer, Sustainability Consultant",     desc: "Develops sustainable technologies related to energy, water, and the environment." },
+  32: { name: "Skilled Trades Technician",              cluster: "Engineering & Physical Systems", titles: "Electrician, Plumber, Machinist, HVAC Technician, Welder",                       desc: "Applies technical skills in construction, repairs, and maintenance hands-on." },
+  33: { name: "Pilot / Aviation Professional",          cluster: "Transport & Safety",             titles: "Commercial Pilot, Air Traffic Controller, Aviation Engineer",                     desc: "Operates, manages, or supports aircraft and aviation systems." },
+  34: { name: "Emergency & Protective Services",        cluster: "Transport & Safety",             titles: "Police Officer, Firefighter, Paramedic, Security Officer",                        desc: "Maintains community safety and responds to emergencies." },
+  35: { name: "NGO / International Development Officer",cluster: "Public Services & Impact",       titles: "Program Manager, Aid Worker, Field Coordinator, Development Officer",              desc: "Leads or supports humanitarian and development projects locally or globally." },
+  36: { name: "Sports Coach / PE Professional",         cluster: "Public Services & Impact",       titles: "Sports Coach, PE Teacher, Athletic Trainer, Sports Development Officer",           desc: "Coaches athletes, teaches physical education, or manages sport programmes." },
+};
+
+/* ── 2. CONTEXT QUESTIONS (unscored) — Simplified ── */
+const CONTEXT_QUESTIONS = [
+  { id: "CQ1", dim: "Context", text: "Which country do you live in?", type: "text" },
+  { id: "CQ2", dim: "Context", text: "What level are you studying at now?", type: "single",
+    options: ["Secondary school (age 13–17)","Pre-university","University student","Recent graduate","Working professional"] },
+  { id: "CQ3", dim: "Context", text: "How much does your family affect your career choice?", type: "single",
+    options: ["Low — I make this decision myself","Medium — I think about what they want, but I decide","High — what they want is very important to me"] },
+];
+
+/* ── 3. D1 — INTERESTS (Simplified) ── */
+const D1 = [
+  { id:"IQ1",  neg:false, roles:[1,2,4,12],    text:"Do you like helping people with their health — their body or their mind?" },
+  { id:"IQ2",  neg:false, roles:[5,6,7,8],     text:"Do you enjoy making things with computer programs, code, or digital tools?" },
+  { id:"IQ3",  neg:false, roles:[4,19,17,13],  text:"Are you excited about helping communities or making society better?" },
+  { id:"IQ4",  neg:false, roles:[9,13,11,10],  text:"Do you enjoy leading a team or making important decisions for other people?" },
+  { id:"IQ5",  neg:false, roles:[16,17,31,10], text:"Are you interested in how laws, contracts, or government rules work in real life?" },
+  { id:"IQ6",  neg:false, roles:[21,25,22,20], text:"Do you enjoy creating visual work, like graphics, design, fashion, or art?" },
+  { id:"IQ7",  neg:false, roles:[15,14,6,10],  text:"Do you enjoy studying numbers, markets, or money-related information?" },
+  { id:"IQ8",  neg:false, roles:[18,36,11,20], text:"Do you feel excited when you teach, coach, or help someone learn something new?" },
+  { id:"IQ9",  neg:false, roles:[24,22,23,17], text:"Do you enjoy writing articles, stories, reports, or other creative content?" },
+  { id:"IQ10", neg:false, roles:[6,5,7,8],     text:"Are you excited about new technology, like AI, apps, or cybersecurity?" },
+  { id:"IQ11", neg:false, roles:[26,27,28,23], text:"Do you enjoy cooking, welcoming guests, or planning fun activities for others?" },
+  { id:"IQ12", neg:false, roles:[20,29,30,21], text:"Would you enjoy designing or planning buildings, cities, or other places?" },
+  { id:"IQ13", neg:true,  roles:[32,35,26,33], text:"Would it bother you to spend most of your day at a desk doing paperwork?" },
+  { id:"IQ14", neg:true,  roles:[19,11,27,23], text:"Would it be boring for you to work alone on a computer, without talking to many people?" },
+  { id:"IQ15", neg:true,  roles:[33,34,1,29],  text:"Would you feel uncomfortable in fast, stressful emergency situations?" },
+  { id:"IQ16", neg:true,  roles:[13,8,22,31],  text:"Would it be boring for you to do the exact same steps every day at work?" },
+  { id:"IQ17", neg:true,  roles:[32,36,29,28], text:"Would it be hard for you to enjoy a job where you stay indoors and don't move much?" },
+];
+
+/* ── 4. D2 — WORK STYLE (Simplified) ── */
+const D2 = [
+  { id:"WQ1", text:"When you work on a task, what do you prefer?",
+    optA:"Work alone and take full responsibility",         rolesA:[32,6,14,24,16],
+    optB:"Work closely with others and share ideas",        rolesB:[9,11,27,18,23] },
+  { id:"WQ2", text:"Which work environment gives you more energy?",
+    optA:"Structured — clear goals, clear steps, few surprises",        rolesA:[14,20,3,29,34],
+    optB:"Changing — fast, different every day, you adapt as you go",   rolesB:[13,5,23,35,8] },
+  { id:"WQ3", text:"When you solve a problem, what do you usually do?",
+    optA:"Study the information carefully first",                        rolesA:[6,14,10,15,16],
+    optB:"Act quickly, try things, and change your plan based on the results", rolesB:[13,5,7,23,36] },
+  { id:"WQ4", text:"Which type of work fits you better?",
+    optA:"Mental work — research, thinking, writing, and planning",     rolesA:[6,15,16,24,18],
+    optB:"Hands-on work — building, making, and creating things with your hands", rolesB:[32,26,29,30,28] },
+  { id:"WQ5", text:"In a team, which role do you naturally take?",
+    optA:"Planner — you decide the direction",                          rolesA:[9,17,10,15,8],
+    optB:"Doer — you make things happen",                               rolesB:[5,32,26,30,29] },
+  { id:"WQ6", text:"How do you prefer to work with other people?",
+    optA:"Little contact with people — I focus best with quiet time",   rolesA:[5,6,14,24,3],
+    optB:"A lot of contact with people — busy and full of energy all day", rolesB:[23,28,27,36,4] },
+  { id:"WQ7", text:"How do you prefer to make decisions?",
+    optA:"Using logic and facts",                                       rolesA:[6,14,15,7,10],
+    optB:"Using your feelings and understanding of other people",       rolesB:[4,18,11,2,36] },
+  { id:"WQ8", text:"Which work rhythm do you prefer?",
+    optA:"Focus deeply on one big project at a time",                   rolesA:[3,16,24,29,6],
+    optB:"Handle many different tasks and switch between them",         rolesB:[23,27,13,34,11] },
+];
+
+/* ── 5. D3 — VALUES (Simplified question stems; Low/Mid/High descriptions unchanged) ── */
+const D3_SCALE = [
+  { id:"VQ1", text:"How important is it for your work to help other people directly?",
+    optLow:"Not important — impact on people doesn't drive me",
+    optMid:"Somewhat important",
+    optHigh:"Very important — helping people is core to why I work",
+    rolesHigh:[1,2,4,28,35], rolesLow:[9,12,27,36] },
+  { id:"VQ2", text:"How important is having a safe and stable job for you?",
+    optLow:"Not important — I embrace risk and uncertainty",
+    optMid:"Somewhat important",
+    optHigh:"Very important — I need to feel financially stable",
+    rolesHigh:[14,30,3,29,34], rolesLow:[13,5,22,25] },
+  { id:"VQ3", text:"How important is it for your job to help the environment or society?",
+    optLow:"Not a priority for me",
+    optMid:"Somewhat important",
+    optHigh:"A core priority — I want my work to matter beyond profit",
+    rolesHigh:[35,4,2,31,17], rolesLow:[13,33,19,36] },
+];
+
+const D3_TRADEOFF = [
+  { id:"VQ4", text:"If you had to choose between two jobs, which one would you pick?",
+    optA:"A job that pays more, but you have little creative freedom",   rolesA:[14,15,9,12,7],
+    optB:"A job that pays less, but you have full creative freedom",     rolesB:[21,22,24,25,20] },
+  { id:"VQ5", text:"If you had to choose between two jobs, which one would you pick?",
+    optA:"A job behind the scenes — your work matters, but people don't see you", rolesA:[6,14,30,3,31],
+    optB:"A public job — you present, publish, or appear in front of others",      rolesB:[23,22,18,24,27] },
+  { id:"VQ6", text:"If you had to choose between two paths, which one would you pick?",
+    optA:"A stable job at a company, with safety and a clear path for promotion", rolesA:[14,9,16,18,30],
+    optB:"Starting your own business, with freedom but no guarantees",            rolesB:[13,5,22,21,25] },
+  { id:"VQ7", text:"If you had to choose, which one would you prefer?",
+    optA:"Working mostly with ideas, information, or objects",          rolesA:[6,14,5,24,31],
+    optB:"Working mostly with people — you enjoy talking and interacting", rolesB:[1,19,27,4,36] },
+];
+
+/* ── 6. D4 — STRENGTHS (Simplified) ── */
+const D4 = [
+  { id:"SQ1", roles:[2,4,18,11,12],  text:"People often come to me for advice or to talk about a problem." },
+  { id:"SQ2", roles:[14,6,16,3,10],  text:"I often notice mistakes or missing information that other people don't see." },
+  { id:"SQ3", roles:[19,24,10,8,22], text:"I can explain difficult ideas in a clear and simple way." },
+  { id:"SQ4", roles:[9,34,33,13,1],  text:"When a situation is difficult or stressful, I naturally become the leader." },
+  { id:"SQ5", roles:[21,20,25,22,23],text:"I have a good eye for design — I notice how things look." },
+];
+
+/* ── 7. D5 — BONUS (Simplified) ── */
+const D5 = [
+  { id:"BQ1", text:"Which place feels most natural to you?",
+    options:[
+      { label:"A", text:"A lab, clinic, or research center",      role:3  },
+      { label:"B", text:"A government office",                    role:35 },
+      { label:"C", text:"A classroom, school, or training center",role:18 },
+      { label:"D", text:"A startup or technology company",        role:13 },
+    ] },
+  { id:"BQ2", text:"What kind of problem would you most enjoy solving?",
+    options:[
+      { label:"A", text:"How to treat or care for a patient",         role:1  },
+      { label:"B", text:"How to stop a cyberattack or data leak",     role:7  },
+      { label:"C", text:"How to grow a brand and reach new customers",role:23 },
+      { label:"D", text:"How to design a clean energy system",        role:31 },
+    ] },
+  { id:"BQ3", text:"Which one would you enjoy managing most?",
+    options:[
+      { label:"A", text:"A hotel, restaurant, or large event",            role:27 },
+      { label:"B", text:"A construction project, like a building or road",role:29 },
+      { label:"C", text:"A legal case",                                   role:16 },
+      { label:"D", text:"A system for moving and storing products",      role:12 },
+    ] },
+  { id:"BQ4", text:"Which activity sounds most enjoyable every day?",
+    options:[
+      { label:"A", text:"Writing articles, reports, or creative content",role:24 },
+      { label:"B", text:"Designing images, screens, or products",        role:21 },
+      { label:"C", text:"Filming, editing, or running a media channel",  role:22 },
+      { label:"D", text:"Styling, sewing, or designing clothing",        role:25 },
+    ] },
+  { id:"BQ5", text:"Which hands-on activity do you like most?",
+    options:[
+      { label:"A", text:"Flying planes or managing airport operations",  role:33 },
+      { label:"B", text:"Preparing and presenting a fancy meal",         role:26 },
+      { label:"C", text:"Coaching athletes or teaching physical skills", role:36 },
+      { label:"D", text:"Repairing, installing, or building with tools", role:30 },
+    ] },
+];
+
+/* ── 8. FLAT QUEUE ── */
+function buildQueue() {
+  const q = [];
+  CONTEXT_QUESTIONS.forEach(cq => q.push({ section:"CTX", data:cq }));
+  D1.forEach(d => q.push({ section:"D1", data:d }));
+  D2.forEach(d => q.push({ section:"D2", data:d }));
+  D3_SCALE.forEach(d => q.push({ section:"D3_SCALE", data:d }));
+  D3_TRADEOFF.forEach(d => q.push({ section:"D3_TRADEOFF", data:d }));
+  D4.forEach(d => q.push({ section:"D4", data:d }));
+  D5.forEach(d => q.push({ section:"D5", data:d }));
+  return q;
+}
+
+/* ── 9. SCORING ENGINE ── */
+function calcMaxPossible() {
+  const max = {};
+  for (let id = 1; id <= 36; id++) max[id] = 0;
+  D1.forEach(q => q.roles.forEach(r => { max[r] += 2; }));
+  D2.forEach(q => { q.rolesA.forEach(r => { max[r] += 2; }); q.rolesB.forEach(r => { max[r] += 2; }); });
+  D3_SCALE.forEach(q => q.rolesHigh.forEach(r => { max[r] += 2; }));
+  D3_TRADEOFF.forEach(q => { q.rolesA.forEach(r => { max[r] += 2; }); q.rolesB.forEach(r => { max[r] += 2; }); });
+  D4.forEach(q => q.roles.forEach(r => { max[r] += 2; }));
+  return max;
+}
+
+function scoreAssessment(answers) {
+  const raw = {};
+  for (let id = 1; id <= 36; id++) raw[id] = 0;
+
+  D1.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    let pts = 0;
+    if (!q.neg) pts = ans === "likely" ? 2 : ans === "neutral" ? 1 : 0;
+    else        pts = ans === "notlikely" ? 2 : ans === "neutral" ? 1 : 0;
+    q.roles.forEach(r => { raw[r] += pts; });
+  });
+
+  D2.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    if (ans === "A") q.rolesA.forEach(r => { raw[r] += 2; });
+    else             q.rolesB.forEach(r => { raw[r] += 2; });
+  });
+
+  D3_SCALE.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const pts = ans === "high" ? 2 : ans === "mid" ? 1 : 0;
+    q.rolesHigh.forEach(r => { raw[r] += pts; });
+  });
+
+  D3_TRADEOFF.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    if (ans === "A") q.rolesA.forEach(r => { raw[r] += 2; });
+    else             q.rolesB.forEach(r => { raw[r] += 2; });
+  });
+
+  D4.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const pts = ans === "agree" ? 2 : ans === "somewhat" ? 1 : 0;
+    q.roles.forEach(r => { raw[r] += pts; });
+  });
+
+  const maxPossible = calcMaxPossible();
+  const normalised = {};
+  for (let id = 1; id <= 36; id++) {
+    normalised[id] = maxPossible[id] > 0 ? Math.round((raw[id] / maxPossible[id]) * 100) : 0;
+  }
+
+  D5.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const role = q.options[ans].role;
+    normalised[role] += 2;
+  });
+
+  const ranked = Object.entries(normalised)
+    .map(([id, score]) => ({ id: Number(id), score }))
+    .sort((a, b) => b.score - a.score);
+
+  return { normalised, ranked };
+}
+
+/* ── 10. STATE ── */
+const QUEUE   = buildQueue();
+const TOTAL_Q = QUEUE.length;
+
+let currentIdx  = 0;
+let answers     = {};
+let ctxAnswers  = {};
+let selectedVal = null;
+
+/* ── 11. UI HELPERS ── */
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+function setProgress(idx) {
+  const pct = Math.round((idx / TOTAL_Q) * 100);
+  document.getElementById("progress-bar").style.width = pct + "%";
+  document.getElementById("progress-label").textContent = `Question ${idx} of ${TOTAL_Q}`;
+}
+
+function updateNextBtn() {
+  document.getElementById("btn-next").disabled = (selectedVal === null);
+}
+
+function dimLabel(section) {
+  const map = {
+    CTX:"Context", D1:"D1 — Interests", D2:"D2 — Work Style",
+    D3_SCALE:"D3 — Values", D3_TRADEOFF:"D3 — Values",
+    D4:"D4 — Strengths", D5:"D5 — Bonus",
+  };
+  return map[section] || section;
+}
+
+/* ── 12. RENDER QUESTION ── */
+function renderQuestion(idx) {
+  const item = QUEUE[idx];
+  const { section, data } = item;
+  selectedVal = answers[data.id] !== undefined ? answers[data.id] : null;
+
+  setProgress(idx + 1);
+  document.getElementById("dim-badge").textContent  = dimLabel(section);
+  document.getElementById("q-number").textContent   = `Question ${idx + 1} of ${TOTAL_Q}`;
+  document.getElementById("q-text").textContent     = data.text;
+  document.getElementById("btn-back").style.visibility = idx === 0 ? "hidden" : "visible";
+
+  const container = document.getElementById("options-container");
+  container.innerHTML = "";
+  container.className = "options";
+
+  if (section === "CTX" && data.type === "text") {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Type your answer…";
+    input.value = selectedVal || "";
+    input.style.cssText = "width:100%;padding:12px 14px;font-size:15px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;outline:none;";
+    input.addEventListener("input", () => {
+      selectedVal = input.value.trim() || null;
+      updateNextBtn();
+    });
+    container.appendChild(input);
+    updateNextBtn();
+  }
+
+  else if (section === "CTX" && data.type === "single") {
+    data.options.forEach((opt, i) => {
+      const btn = makeOptionBtn(null, opt, i, selectedVal === i,
+        () => { selectedVal = i; renderOptionStates(container, i); updateNextBtn(); });
+      container.appendChild(btn);
+    });
+    updateNextBtn();
+  }
+
+  else if (section === "D1") {
+    container.classList.add("scale-row");
+    [{val:"likely",label:"Likely"},{val:"neutral",label:"Neutral"},{val:"notlikely",label:"Not Likely"}].forEach(opt => {
+      const btn = makeOptionBtn(null, opt.label, opt.val, selectedVal === opt.val,
+        () => { selectedVal = opt.val; renderOptionStates(container, opt.val); updateNextBtn(); });
+      container.appendChild(btn);
+    });
+    updateNextBtn();
+  }
+
+  else if (section === "D2" || section === "D3_TRADEOFF") {
+    container.classList.add("two-col");
+    [["A", data.optA], ["B", data.optB]].forEach(([val, text]) => {
+      const btn = makeOptionBtn(val, text, val, selectedVal === val,
+        () => { selectedVal = val; renderOptionStates(container, val); updateNextBtn(); });
+      container.appendChild(btn);
+    });
+    updateNextBtn();
+  }
+
+  else if (section === "D3_SCALE") {
+    container.classList.add("scale-row");
+    [{val:"low",label:data.optLow},{val:"mid",label:data.optMid},{val:"high",label:data.optHigh}].forEach(opt => {
+      const btn = makeOptionBtn(null, opt.label, opt.val, selectedVal === opt.val,
+        () => { selectedVal = opt.val; renderOptionStates(container, opt.val); updateNextBtn(); });
+      container.appendChild(btn);
+    });
+    updateNextBtn();
+  }
+
+  else if (section === "D4") {
+    container.classList.add("scale-row");
+    [{val:"agree",label:"Agree"},{val:"somewhat",label:"Somewhat Agree"},{val:"disagree",label:"Disagree"}].forEach(opt => {
+      const btn = makeOptionBtn(null, opt.label, opt.val, selectedVal === opt.val,
+        () => { selectedVal = opt.val; renderOptionStates(container, opt.val); updateNextBtn(); });
+      container.appendChild(btn);
+    });
+    updateNextBtn();
+  }
+
+  else if (section === "D5") {
+    container.classList.add("four-col");
+    data.options.forEach((opt, i) => {
+      const btn = makeOptionBtn(opt.label, opt.text, i, selectedVal === i,
+        () => { selectedVal = i; renderOptionStates(container, i); updateNextBtn(); });
+      container.appendChild(btn);
+    });
+    updateNextBtn();
+  }
+}
+
+function makeOptionBtn(label, text, val, isSelected, onClick) {
+  const btn = document.createElement("button");
+  btn.className = "option-btn" + (isSelected ? " selected" : "");
+  btn.dataset.val = val;
+  if (label) {
+    const lSpan = document.createElement("span");
+    lSpan.className = "option-label";
+    lSpan.textContent = label + ". ";
+    btn.appendChild(lSpan);
+  }
+  btn.appendChild(document.createTextNode(text));
+  btn.addEventListener("click", onClick);
+  return btn;
+}
+
+function renderOptionStates(container, selectedRaw) {
+  container.querySelectorAll(".option-btn").forEach(btn => {
+    btn.classList.toggle("selected", String(btn.dataset.val) === String(selectedRaw));
+  });
+}
+
+/* ── 13. NAVIGATION ── */
+function startAssessment() {
+  currentIdx = 0;
+  answers = {};
+  ctxAnswers = {};
+  selectedVal = null;
+  showScreen("screen-question");
+  renderQuestion(0);
+}
+
+function goNext() {
+  if (selectedVal === null) return;
+  const { section, data } = QUEUE[currentIdx];
+
+  const impact = buildImpact(section, data, selectedVal);
+
+  if (section === "CTX") {
+    const val = data.type === "text"
+      ? (document.querySelector("#options-container input") || {}).value || selectedVal
+      : selectedVal;
+    ctxAnswers[data.id] = data.type === "text" ? val : data.options[val];
+    answers[data.id] = selectedVal;
+  } else {
+    answers[data.id] = selectedVal;
+  }
+
+  refreshScoringPanel(impact);
+
+  currentIdx++;
+  if (currentIdx >= TOTAL_Q) {
+    showResults();
+  } else {
+    selectedVal = answers[QUEUE[currentIdx].data.id] !== undefined ? answers[QUEUE[currentIdx].data.id] : null;
+    renderQuestion(currentIdx);
+  }
+}
+
+function goBack() {
+  if (currentIdx === 0) return;
+  if (selectedVal !== null) answers[QUEUE[currentIdx].data.id] = selectedVal;
+  currentIdx--;
+  selectedVal = answers[QUEUE[currentIdx].data.id] !== undefined ? answers[QUEUE[currentIdx].data.id] : null;
+  renderQuestion(currentIdx);
+}
+
+function restartAssessment() {
+  showScreen("screen-welcome");
+}
+
+/* ── 14. RESULTS ── */
+function showResults() {
+  const { normalised, ranked } = scoreAssessment(answers);
+  showScreen("screen-results");
+
+  const studyLevel = ctxAnswers["CQ2"] || "";
+  const country    = ctxAnswers["CQ1"] || "";
+  const sub = document.getElementById("results-subtitle");
+  sub.textContent = studyLevel
+    ? `Based on your responses${country ? " from " + country : ""} — here are your top career matches${studyLevel ? " as a " + studyLevel.toLowerCase() : ""}.`
+    : "Based on your responses, here are your top career matches.";
+
+  const top3Container = document.getElementById("top3-container");
+  top3Container.innerHTML = "";
+  const medals = ["🥇","🥈","🥉"];
+  const rankLabels = ["1st Match","2nd Match","3rd Match"];
+  const rankClasses = ["rank-1","rank-2","rank-3"];
+
+  ranked.slice(0, 3).forEach((item, i) => {
+    const role = ROLES[item.id];
+    const card = document.createElement("div");
+    card.className = `result-card ${rankClasses[i]}`;
+    card.innerHTML = `
+      <div class="result-rank-row">
+        <span class="medal">${medals[i]}</span>
+        <span class="result-rank-label">${rankLabels[i]}</span>
+        <span class="result-match">${item.score}%</span>
+      </div>
+      <div class="result-role">${role.name}</div>
+      <div class="result-cluster">${role.cluster}</div>
+      <div class="result-titles">e.g. ${role.titles}</div>
+      <div class="result-desc">${role.desc}</div>
+    `;
+    top3Container.appendChild(card);
+  });
+
+  const maxScore = ranked[0].score || 1;
+  const breakdownEl = document.getElementById("full-breakdown");
+  breakdownEl.innerHTML = "";
+  ranked.forEach((item, i) => {
+    const role = ROLES[item.id];
+    const barPct = Math.round((item.score / Math.max(maxScore, 1)) * 100);
+    const row = document.createElement("div");
+    row.className = "breakdown-row";
+    row.innerHTML = `
+      <span class="breakdown-rank">${i+1}</span>
+      <span class="breakdown-name">${role.name}</span>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${barPct}%"></div></div>
+      <span class="breakdown-pct">${item.score}%</span>
+    `;
+    breakdownEl.appendChild(row);
+  });
+
+  const reflEl = document.getElementById("context-reflection");
+  const familyAns = ctxAnswers["CQ3"] || "";
+  if (familyAns) {
+    let familyMsg = "";
+    if (familyAns.startsWith("High")) {
+      familyMsg = "You said your family's expectations matter a lot to you. Consider talking about your top matches with them — these are well-known and respected careers that may fit well with what your family values.";
+    } else if (familyAns.startsWith("Medium")) {
+      familyMsg = "You said you think about your family's views, but make your own decision. Your top matches reflect your own interests — sharing these results with your family can be a good way to start a helpful conversation.";
+    } else {
+      familyMsg = "You make your own career decisions by yourself. Trust the results — they reflect your real interests and the way you like to work.";
+    }
+
+    let nextSteps = "";
+    if (studyLevel.includes("Secondary")) {
+      nextSteps = "As a secondary school student, focus on the <strong>subjects</strong> that connect to your top match. Look into which university programs lead to roles like this.";
+    } else if (studyLevel.includes("University") || studyLevel.includes("Pre-university")) {
+      nextSteps = "Look into <strong>degree options</strong> and <strong>internships</strong> connected to your top match. Talk to people working in this field through LinkedIn or career events at your university.";
+    } else if (studyLevel.includes("graduate") || studyLevel.includes("professional")) {
+      nextSteps = "Explore ways to <strong>move into</strong> your top matched role — extra courses, certificates, or a new role inside your current company may help.";
+    }
+
+    reflEl.innerHTML = `
+      <h3>Reflection</h3>
+      <p><strong>Family influence:</strong> ${familyMsg}</p>
+      ${nextSteps ? `<p><strong>Next steps for you:</strong> ${nextSteps}</p>` : ""}
+    `;
+  } else {
+    reflEl.style.display = "none";
+  }
+}
+
+/* ── 15. LIVE SCORING PANEL ── */
+let scoringPanelOpen = false;
+
+function toggleScoringPanel() {
+  scoringPanelOpen = !scoringPanelOpen;
+  const body = document.getElementById("scoring-body");
+  const toggle = document.getElementById("scoring-toggle");
+  body.style.display = scoringPanelOpen ? "block" : "none";
+  toggle.textContent = scoringPanelOpen ? "🔢 Hide Live Scoring" : "🔢 Show Live Scoring";
+  toggle.style.borderRadius = scoringPanelOpen ? "var(--radius) var(--radius) 0 0" : "var(--radius)";
+  if (scoringPanelOpen) refreshScoringPanel(null);
+}
+
+function refreshScoringPanel(lastImpact) {
+  if (!scoringPanelOpen) return;
+
+  const rawScores = calcRunningRaw(answers);
+  const maxPossible = calcMaxPossible();
+
+  const impactEl = document.getElementById("last-impact");
+  if (!lastImpact) {
+    impactEl.innerHTML = `<span class="scoring-empty">Answer a question to see scoring.</span>`;
+  } else {
+    let noteHtml = `<div class="impact-note">${lastImpact.explanation}</div>`;
+    let rowsHtml = lastImpact.affected
+      .sort((a, b) => b.pts - a.pts)
+      .map(r => `
+        <div class="impact-row">
+          <span class="impact-pts pts-${r.pts}">+${r.pts}</span>
+          <span class="impact-role">${ROLES[r.id].name}</span>
+          <span class="impact-cluster">${ROLES[r.id].cluster}</span>
+          <span class="impact-total">Total: ${rawScores[r.id]}</span>
+        </div>
+      `).join("");
+    impactEl.innerHTML = noteHtml + rowsHtml;
+  }
+
+  const ranked = Object.entries(rawScores)
+    .map(([id, raw]) => ({ id: Number(id), raw }))
+    .sort((a, b) => b.raw - a.raw);
+
+  const topRaw = ranked[0]?.raw || 1;
+  const standingsEl = document.getElementById("live-standings");
+  standingsEl.innerHTML = ranked.slice(0, 10).map((item, i) => {
+    const barPct = Math.round((item.raw / Math.max(topRaw, 1)) * 100);
+    const maxPoss = maxPossible[item.id];
+    return `
+      <div class="standing-row">
+        <span class="standing-rank">${i + 1}</span>
+        <span class="standing-name">${ROLES[item.id].name}</span>
+        <div class="standing-bar-wrap"><div class="standing-bar" style="width:${barPct}%"></div></div>
+        <span class="standing-raw">${item.raw}/${maxPoss}</span>
+      </div>
+    `;
+  }).join("");
+
+  const allEl = document.getElementById("all-scores");
+  allEl.innerHTML = `<div class="all-scores-grid">` +
+    ranked.map(item => `
+      <div class="score-row">
+        <span class="score-id">${item.id}</span>
+        <span class="score-name" title="${ROLES[item.id].name}">${ROLES[item.id].name}</span>
+        <span class="score-val${item.raw === 0 ? " zero" : ""}">${item.raw}</span>
+      </div>
+    `).join("") +
+  `</div>`;
+}
+
+function calcRunningRaw(answers) {
+  const raw = {};
+  for (let id = 1; id <= 36; id++) raw[id] = 0;
+
+  D1.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    let pts = 0;
+    if (!q.neg) pts = ans === "likely" ? 2 : ans === "neutral" ? 1 : 0;
+    else        pts = ans === "notlikely" ? 2 : ans === "neutral" ? 1 : 0;
+    q.roles.forEach(r => { raw[r] += pts; });
+  });
+
+  D2.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    if (ans === "A") q.rolesA.forEach(r => { raw[r] += 2; });
+    else             q.rolesB.forEach(r => { raw[r] += 2; });
+  });
+
+  D3_SCALE.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const pts = ans === "high" ? 2 : ans === "mid" ? 1 : 0;
+    q.rolesHigh.forEach(r => { raw[r] += pts; });
+  });
+
+  D3_TRADEOFF.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    if (ans === "A") q.rolesA.forEach(r => { raw[r] += 2; });
+    else             q.rolesB.forEach(r => { raw[r] += 2; });
+  });
+
+  D4.forEach(q => {
+    const ans = answers[q.id];
+    if (ans === undefined) return;
+    const pts = ans === "agree" ? 2 : ans === "somewhat" ? 1 : 0;
+    q.roles.forEach(r => { raw[r] += pts; });
+  });
+
+  return raw;
+}
+
+function buildImpact(section, data, answerVal) {
+  let affected = [];
+  let explanation = "";
+
+  if (section === "CTX") return null;
+
+  if (section === "D1") {
+    const q = data;
+    let pts;
+    if (!q.neg) {
+      pts = answerVal === "likely" ? 2 : answerVal === "neutral" ? 1 : 0;
+      const ansLabel = answerVal === "likely" ? "Likely" : answerVal === "neutral" ? "Neutral" : "Not Likely";
+      explanation = `D1 Interest (POS): You answered <strong>${ansLabel}</strong> → <strong>${pts} point${pts !== 1 ? "s" : ""}</strong> added to each of the ${q.roles.length} linked roles.`;
+    } else {
+      pts = answerVal === "notlikely" ? 2 : answerVal === "neutral" ? 1 : 0;
+      const ansLabel = answerVal === "notlikely" ? "Not Likely" : answerVal === "neutral" ? "Neutral" : "Likely";
+      explanation = `D1 Interest (NEG — inverted scoring): You answered <strong>${ansLabel}</strong> → <strong>${pts} point${pts !== 1 ? "s" : ""}</strong> added to each of the ${q.roles.length} linked roles. (NEG questions reward "Not Likely" with 2pts to catch response bias.)`;
+    }
+    affected = q.roles.map(id => ({ id, pts }));
+  }
+
+  else if (section === "D2") {
+    const chosen = answerVal === "A" ? data.rolesA : data.rolesB;
+    const other  = answerVal === "A" ? data.rolesB : data.rolesA;
+    explanation = `D2 Work Style (forced choice): You chose <strong>Option ${answerVal}</strong> → <strong>+2 pts</strong> to ${chosen.length} roles on that side. The other ${other.length} roles get 0.`;
+    affected = [...chosen.map(id => ({ id, pts: 2 })), ...other.map(id => ({ id, pts: 0 }))];
+  }
+
+  else if (section === "D3_SCALE") {
+    const pts = answerVal === "high" ? 2 : answerVal === "mid" ? 1 : 0;
+    const label = answerVal === "high" ? "High" : answerVal === "mid" ? "Medium" : "Low";
+    explanation = `D3 Values (scale): You answered <strong>${label}</strong> → <strong>${pts} pt${pts !== 1 ? "s" : ""}</strong> to ${data.rolesHigh.length} High-linked roles. Low-linked roles always receive 0.`;
+    affected = [...data.rolesHigh.map(id => ({ id, pts })), ...data.rolesLow.map(id => ({ id, pts: 0 }))];
+  }
+
+  else if (section === "D3_TRADEOFF") {
+    const chosen = answerVal === "A" ? data.rolesA : data.rolesB;
+    const other  = answerVal === "A" ? data.rolesB : data.rolesA;
+    explanation = `D3 Values (trade-off): You chose <strong>Option ${answerVal}</strong> → <strong>+2 pts</strong> to ${chosen.length} roles. The other ${other.length} roles get 0.`;
+    affected = [...chosen.map(id => ({ id, pts: 2 })), ...other.map(id => ({ id, pts: 0 }))];
+  }
+
+  else if (section === "D4") {
+    const pts = answerVal === "agree" ? 2 : answerVal === "somewhat" ? 1 : 0;
+    const label = answerVal === "agree" ? "Agree" : answerVal === "somewhat" ? "Somewhat Agree" : "Disagree";
+    explanation = `D4 Strengths: You answered <strong>${label}</strong> → <strong>${pts} pt${pts !== 1 ? "s" : ""}</strong> added to each of the ${data.roles.length} linked roles.`;
+    affected = data.roles.map(id => ({ id, pts }));
+  }
+
+  else if (section === "D5") {
+    const picked = data.options[answerVal];
+    explanation = `D5 Bonus (tiebreaker — applied after normalisation): You selected <strong>Option ${picked.label}</strong> → <strong>+2 pts</strong> to <strong>${ROLES[picked.role].name}</strong> only. Other options get 0.`;
+    affected = data.options.map((opt, i) => ({ id: opt.role, pts: i === answerVal ? 2 : 0 }));
+  }
+
+  return { explanation, affected };
+}
+</script>
+</body>
+</html>
